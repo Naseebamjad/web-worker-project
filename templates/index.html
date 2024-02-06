@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THREAD CHECKING</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    #profile {
+      border: 2px solid #ccc;
+      padding: 20px;
+      margin: 20px auto;
+      max-width: 400px;
+      background-color: #fff;
+    }
+
+    button {
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    #output {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Thread Profile </h1>
+
+  <div id="profile">
+    <h2>Thread</h2>
+    
+    
+    <button onclick="performProcessingWithoutWorkers()">Process Without Workers</button>
+    <button onclick="performProcessingWithWorkers()">Process With Workers</button>
+    <button onclick="checkUIThread()">Check Main Thread Responding</button>
+  </div>
+
+  <div id="output"></div>
+
+  <script>
+   
+    function performProcessingWithoutWorkers() {
+      const startTime = new Date().getTime();
+
+      // Simulating time-consuming task
+      let sum = 0;
+      for (let i = 0; i < 9999999999; i++) {
+           sum += i;
+
+      }
+
+      const endTime = new Date().getTime();
+      const duration = endTime - startTime;
+
+      displayResult(`Processing without Web Workers  ${duration} milliseconds.`);
+    }
+
+    function performProcessingWithWorkers() {
+      const startTime = new Date().getTime();
+
+      const worker = new Worker('{{ url_for('static', filename='worker.js') }}');
+
+      worker.onmessage = function (event) {
+        const endTime = new Date().getTime();
+        const duration = endTime - startTime;
+
+        displayResult(`Processing with Web Workers  ${duration} milliseconds.`);
+      };
+
+      worker.postMessage({ task: 'simulateProcessing', iterations: 1000000000 });
+    }
+
+    function checkUIThread() {
+      alert("Working!");
+    }
+
+    function displayResult(result) {
+      document.getElementById('output').innerText = result;
+    }
+  </script>
+
+</body>
+</html>
